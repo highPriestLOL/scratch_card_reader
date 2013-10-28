@@ -1,5 +1,6 @@
 package org.cgiar.ilri.lab;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import com.googlecode.tesseract.android.TessBaseAPI;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -454,7 +457,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				double activeImageWidth = Preview.this.activeImageWidth - xCompensation;
 				
 				Log.d("CAMERA", "byte size = "+String.valueOf(data[0].length));
-				Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
+				
+				BitmapFactory.Options options=new BitmapFactory.Options();
+				// resize the image using Options method
+				options.inSampleSize = 8;
+				InputStream is = new ByteArrayInputStream(data[0]);
+				Bitmap bitmap=BitmapFactory.decodeStream(is,null,options);
+				// keeps running out of memory chewing the raw picture taken using inSampleSize above to mitigate that
+				Log.d("CAMERA", "SHRINKED WIDTH TO  "+String.valueOf(bitmap.getWidth()));
+				
+				//Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
 				Matrix matrix=new Matrix();
 				matrix.postRotate(90);
 				Bitmap rotatedImage=Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
